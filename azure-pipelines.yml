@@ -14,7 +14,7 @@ stages:
         steps:
         - task: TerraformInstaller@1
           inputs:
-            terraformVersion: 'latest'
+            terraformVersion: '4.80.0'
         - task: tfsec@1
           inputs:
             version: 'v1.26.0'
