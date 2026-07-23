@@ -23,6 +23,7 @@ stages:
             provider: 'azurerm'
             command: 'init'
             backendServiceArm: 'nekram svc'
+            workingDirectory: $(Build.SourcesDirectory)/infra
             backendAzureRmResourceGroupName: 'dev-rgnew'
             backendAzureRmStorageAccountName: 'devstorageado'
             backendAzureRmContainerName: 'adocontainer'
@@ -32,12 +33,14 @@ stages:
             provider: 'azurerm'
             command: 'plan'
             environmentServiceNameAzureRM: 'nekram svc'
+            workingDirectory: $(Build.SourcesDirectory)/infra
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
             command: 'apply'
             commandOptions: '-auto-approve'
             environmentServiceNameAzureRM: 'nekram svc'
+            workingDirectory: $(Build.SourcesDirectory)/infra
 
 
 
