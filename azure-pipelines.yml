@@ -17,9 +17,13 @@ stages:
           inputs:
             targetType: 'inline'
             script: 'tfsec .\environment\dev --tfvars-file/environment/dev/terraform'
-        - task: tfsec@1
-          inputs:
-            version: 'v1.26.0'
+
+  - stage: Terraforminit
+    displayName: Init
+    jobs:
+      - job: 
+        displayName: Init
+        steps:        
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
@@ -30,12 +34,26 @@ stages:
             backendAzureRmStorageAccountName: 'backendstoragevik'
             backendAzureRmContainerName: 'backendcontaine'
             backendAzureRmKey: 'modules.tfstate'
+
+  - stage: Terraformplan
+    displayName: Plan
+    jobs:
+      - job: 
+        displayName: Plan
+        steps:
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
             command: 'plan'
             environmentServiceNameAzureRM: 'newadosvc'
             workingDirectory: $(Build.SourcesDirectory)/environment/dev
+
+  - stage: Terraformapply
+    displayName: apply
+    jobs:
+      - job: 
+        displayName: apply
+        steps:
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
