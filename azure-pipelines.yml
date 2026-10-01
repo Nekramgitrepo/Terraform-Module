@@ -1,20 +1,22 @@
 trigger:
   branches:
     include:
+      - feature/*
       - main
 
-pool: nekramagent
+pool: agentpool12
 
 stages:
-  - stage: 
-    displayName: Terraformmodule
+  - stage: Terraformscan
+    displayName: scan
     jobs:
       - job: 
-        displayName: Terraform module run
+        displayName: scan
         steps:
-        - task: TerraformInstaller@1
+        - task: PowerShell@2
           inputs:
-            terraformVersion: '4.80.0'
+            targetType: 'inline'
+            script: 'tfsec .\environment\dev --tfvars-file/environment/dev/terraform'
         - task: tfsec@1
           inputs:
             version: 'v1.26.0'
@@ -22,25 +24,25 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-            backendServiceArm: 'nekram svc'
-            workingDirectory: $(Build.SourcesDirectory)/infra
-            backendAzureRmResourceGroupName: 'dev-rgnew'
-            backendAzureRmStorageAccountName: 'devstorageado'
-            backendAzureRmContainerName: 'adocontainer'
-            backendAzureRmKey: 'module.tfstate'
+            backendServiceArm: 'newadosvc'
+            workingDirectory: $(Build.SourcesDirectory)/environment/dev
+            backendAzureRmResourceGroupName: 'RG-Backend'
+            backendAzureRmStorageAccountName: 'backendstoragevik'
+            backendAzureRmContainerName: 'backendcontaine'
+            backendAzureRmKey: 'modules.tfstate'
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
             command: 'plan'
-            environmentServiceNameAzureRM: 'nekram svc'
-            workingDirectory: $(Build.SourcesDirectory)/infra
+            environmentServiceNameAzureRM: 'newadosvc'
+            workingDirectory: $(Build.SourcesDirectory)/environment/dev
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
             command: 'apply'
             commandOptions: '-auto-approve'
-            environmentServiceNameAzureRM: 'nekram svc'
-            workingDirectory: $(Build.SourcesDirectory)/infra
+            environmentServiceNameAzureRM: 'newadosvc'
+            workingDirectory: $(Build.SourcesDirectory)/environment/dev
 
 
 
