@@ -9,6 +9,7 @@ pool: agentpool12
 stages:
   - stage: Terraformscan
     displayName: scan
+    dependsOn: []
     jobs:
       - job: 
         displayName: scan
@@ -20,6 +21,7 @@ stages:
 
   - stage: Terraforminit
     displayName: Init
+    dependsOn: []
     jobs:
       - job: 
         displayName: Init
@@ -37,6 +39,7 @@ stages:
 
   - stage: Terraformplan
     displayName: Plan
+    dependsOn: Terraforminit
     jobs:
       - job: 
         displayName: Plan
@@ -50,6 +53,7 @@ stages:
 
   - stage: Terraformapply
     displayName: apply
+    dependsOn: Terraformplan
     jobs:
       - job: 
         displayName: apply
