@@ -34,7 +34,7 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/environment/dev
             backendAzureRmResourceGroupName: 'RG-Backend'
             backendAzureRmStorageAccountName: 'backendstoragevik'
-            backendAzureRmContainerName: 'backendcontaine'
+            backendAzureRmContainerName: 'backendcontainer'
             backendAzureRmKey: 'modules.tfstate'
 
   - stage: Terraformplan
