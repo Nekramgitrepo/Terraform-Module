@@ -6,9 +6,24 @@ trigger:
 
 pool: agentpool12
 
+parameters:
+  - name: tfsec
+    displayName: Runtfsec?
+    type: boolean
+
+  - name: tflint
+    displayName: Runtflint?
+    type: boolean
+
+  - name: Infracost
+    displayName: RuntInfracost?
+    type: boolean
+
 stages:
   - stage: tfsec
     displayName: tfsec
+    condition: ${{ parameter.runTfsec }}
+    dependsOn: []
     jobs:
       - job: tfsec
         displayName: tfsec
@@ -18,20 +33,24 @@ stages:
             targetType: 'inline'
             script: 'tfsec $(Build.SourcesDirectory)/environment/dev'
   - stage: tflint
-    displayName: tflin
+    displayName: tflint
+    condition: ${{ parameter.runTflint }}
+    dependsOn: []
     jobs:
-      - job: tflin
-        displayName: tflin
+      - job: tflint
+        displayName: tflint
         steps:
         - task: PowerShell@2
           inputs:
             targetType: 'inline'
             script: 'tflint --recursive --force'
-  - stage: infracost
-    displayName: infracost
+  - stage: Infracost
+    displayName: Infracost
+    condition: ${{ parameter.Infracost }}
+    dependsOn: []
     jobs:
-      - job: infracost
-        displayName: infracost
+      - job: Infracost
+        displayName: Infracost
         steps:
         - task: InfracostSetup@2
           inputs:
@@ -41,6 +60,10 @@ stages:
 
   - stage: Terraformvalidate
     displayName: validate
+    dependsOn:
+    - tfsec
+    - tflint
+    - Infracost   
     jobs:
       - job: validate
         displayName: validate
@@ -62,6 +85,8 @@ stages:
             workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
   - stage: Terraformplan
     displayName: plan
+    dependsOn: Terraformvalidate
+
     jobs:
       - job: Plan
         displayName: plan
@@ -87,6 +112,7 @@ stages:
   - stage: manualapproval
     pool: server
     displayName: approval
+    dependsOn: Terraformplan
     jobs:
       - job: 
         displayName: approval
@@ -98,6 +124,7 @@ stages:
        
   - stage: Terraformapply
     displayName: Apply
+    dependsOn: manualapproval
     jobs:
       - job: TerraformApplyJob
         displayName: Terraform Apply
