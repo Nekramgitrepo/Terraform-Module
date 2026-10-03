@@ -19,6 +19,22 @@ parameters:
     displayName: RuntInfracost?
     type: boolean
 
+  - name: Terraformvalidate
+    displayName: RuntTerraformvalidate?
+    type: boolean
+
+  - name: Terraformplan
+    displayName: RuntTerraformplan?
+    type: boolean
+
+  - name: manualapproval
+    displayName: manualapproval?
+    type: boolean
+
+  - name: Terraformapply
+    displayName: RuntTerraformapply?
+    type: boolean
+
 stages:
   - stage: tfsec
     displayName: tfsec
