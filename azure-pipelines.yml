@@ -7,23 +7,23 @@ trigger:
 pool: agentpool12
 
 parameters:
-  - name: Tfsec
+  - name: runTfsec
     displayName: RunTfsec?
     type: boolean
 
-  - name: Tflint
+  - name: runTflint
     displayName: RunTflint?
     type: boolean
 
-  - name: Infracost
+  - name: runInfracost
     displayName: RuntInfracost?
     type: boolean
 
-  - name: Terraformvalidate
+  - name: runTerraformvalidate
     displayName: RuntTerraformvalidate?
     type: boolean
 
-  - name: Terraformplan
+  - name: runTerraformplan
     displayName: RuntTerraformplan?
     type: boolean
 
@@ -31,7 +31,7 @@ parameters:
     displayName: manualapproval?
     type: boolean
 
-  - name: Terraformapply
+  - name: runTerraformapply
     displayName: RuntTerraformapply?
     type: boolean
 
