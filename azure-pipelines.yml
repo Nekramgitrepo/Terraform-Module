@@ -16,23 +16,23 @@ parameters:
     type: boolean
 
   - name: runInfracost
-    displayName: RuntInfracost?
+    displayName: RunInfracost?
     type: boolean
 
   - name: runTerraformvalidate
-    displayName: RuntTerraformvalidate?
+    displayName: RunTerraformvalidate?
     type: boolean
 
   - name: runTerraformplan
-    displayName: RuntTerraformplan?
+    displayName: RunTerraformplan?
     type: boolean
 
-  - name: manualapproval
+  - name: runmanualapproval
     displayName: manualapproval?
     type: boolean
 
   - name: runTerraformapply
-    displayName: RuntTerraformapply?
+    displayName: RunTerraformapply?
     type: boolean
 
 stages:
@@ -62,7 +62,7 @@ stages:
             script: 'tflint --recursive --force'
   - stage: Infracost
     displayName: Infracost
-    condition: ${{ parameters.Infracost }}
+    condition: ${{ parameters.runInfracost }}
     dependsOn: []
     jobs:
       - job: Infracost
