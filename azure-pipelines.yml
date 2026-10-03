@@ -47,6 +47,16 @@ stages:
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'newadosvc'
+            workingDirectory: $(Build.SourcesDirectory)/environment/dev
+            backendAzureRmResourceGroupName: 'RG-Backend'
+            backendAzureRmStorageAccountName: 'backendstoragevik'
+            backendAzureRmContainerName: 'backendcontainer'
+            backendAzureRmKey: 'modules.tfstate'
+        - task: TerraformTask@5
+          inputs:
+            provider: 'azurerm'
             command: 'validate'
             workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
   - stage: Terraformplan
