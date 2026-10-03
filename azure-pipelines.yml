@@ -27,6 +27,16 @@ stages:
           inputs:
             targetType: 'inline'
             script: 'tflint --recursive --force'
+  - stage: infracost
+    displayName: infracost
+    jobs:
+      - job: infracost
+        displayName: infracost
+        steps:
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: 'infracost breakdown --path ./environment/dev'
   - stage: Terraformvalidate
     displayName: validate
     jobs:
