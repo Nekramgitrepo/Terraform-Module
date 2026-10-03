@@ -7,12 +7,12 @@ trigger:
 pool: agentpool12
 
 parameters:
-  - name: tfsec
-    displayName: Runtfsec?
+  - name: Tfsec
+    displayName: RunTfsec?
     type: boolean
 
-  - name: tflint
-    displayName: Runtflint?
+  - name: Tflint
+    displayName: RunTflint?
     type: boolean
 
   - name: Infracost
@@ -36,25 +36,25 @@ parameters:
     type: boolean
 
 stages:
-  - stage: tfsec
-    displayName: tfsec
+  - stage: Tfsec
+    displayName: Tfsec
     condition: ${{ parameter.runTfsec }}
     dependsOn: []
     jobs:
-      - job: tfsec
-        displayName: tfsec
+      - job: Tfsec
+        displayName: Tfsec
         steps:
         - task: PowerShell@2
           inputs:
             targetType: 'inline'
             script: 'tfsec $(Build.SourcesDirectory)/environment/dev'
-  - stage: tflint
-    displayName: tflint
+  - stage: Tflint
+    displayName: Tflint
     condition: ${{ parameter.runTflint }}
     dependsOn: []
     jobs:
-      - job: tflint
-        displayName: tflint
+      - job: Tflint
+        displayName: Tflint
         steps:
         - task: PowerShell@2
           inputs:
@@ -76,6 +76,7 @@ stages:
 
   - stage: Terraformvalidate
     displayName: validate
+    condition: ${{ parameter.runTerraformvalidate }}
     dependsOn:
     - tfsec
     - tflint
@@ -101,6 +102,7 @@ stages:
             workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
   - stage: Terraformplan
     displayName: plan
+    condition: ${{ parameter.runTerraformplan }}
     dependsOn: Terraformvalidate
 
     jobs:
@@ -128,6 +130,7 @@ stages:
   - stage: manualapproval
     pool: server
     displayName: approval
+    condition: ${{ parameter.runmanualapproval }}
     dependsOn: Terraformplan
     jobs:
       - job: 
@@ -140,6 +143,7 @@ stages:
        
   - stage: Terraformapply
     displayName: Apply
+    condition: ${{ parameter.runTerraformapplyl }}
     dependsOn: manualapproval
     jobs:
       - job: TerraformApplyJob
