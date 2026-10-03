@@ -7,24 +7,22 @@ trigger:
 pool: agentpool12
 
 stages:
-  - stage: Terraformscan
-    displayName: scan
-    dependsOn: []
+  - stage: Terraformvalidate
+    displayName: validate
     jobs:
-      - job: 
-        displayName: scan
+      - job: validate
+        displayName: validate
         steps:
-        - task: PowerShell@2
+        - task: TerraformTask@5
           inputs:
-            targetType: 'inline'
-            script: 'tfsec .\environment\dev --tfvars-file .\environment\dev\terraform.tfvars'
-
-  - stage: Terraforminit
-    displayName: Init
-    dependsOn: []
+            provider: 'azurerm'
+            command: 'validate'
+            workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+  - stage: Terraformplan
+    displayName: plan
     jobs:
-      - job: 
-        displayName: Init
+      - job: Plan
+        displayName: plan
         steps:        
         - task: TerraformTask@5
           inputs:
@@ -37,13 +35,6 @@ stages:
             backendAzureRmContainerName: 'backendcontainer'
             backendAzureRmKey: 'modules.tfstate'
 
-  - stage: Terraformplan
-    displayName: Plan
-    dependsOn: Terraforminit
-    jobs:
-      - job: 
-        displayName: Plan
-        steps:
         - task: TerraformTask@5
           inputs:
             provider: 'azurerm'
@@ -51,20 +42,31 @@ stages:
             environmentServiceNameAzureRM: 'newadosvc'
             workingDirectory: $(Build.SourcesDirectory)/environment/dev
 
-  - stage: Terraformapply
-    displayName: apply
-    dependsOn: Terraformplan
+  - stage: manualapproval
+    pool: server
+    displayName: approval
     jobs:
       - job: 
-        displayName: apply
+        displayName: approval
         steps:
-        - task: TerraformTask@5
+        - task: ManualValidation@1
           inputs:
-            provider: 'azurerm'
-            command: 'apply'
-            commandOptions: '-auto-approve'
-            environmentServiceNameAzureRM: 'newadosvc'
-            workingDirectory: $(Build.SourcesDirectory)/environment/dev
+            notifyUsers: 'abc@gmail.com'
+            instructions: 'approve kardo'
+       
+  - stage: Terraformapply
+    displayName: Apply
+    jobs:
+      - job: TerraformApplyJob
+        displayName: Terraform Apply
+        steps:
+          - task: TerraformTask@5
+            displayName: Terraform Apply
+            inputs:
+              provider: 'azurerm'
+              command: 'apply'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
+              environmentServiceNameAzureRM: 'newadosvc'
 
 
 
