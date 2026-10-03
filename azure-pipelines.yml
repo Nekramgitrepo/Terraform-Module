@@ -33,6 +33,10 @@ stages:
       - job: infracost
         displayName: infracost
         steps:
+        - task: InfracostSetup@2
+          inputs:
+            apiKey: 'ico-Wr0eB6qUSBkRtImO4cmRiEFVabmRvHzQ'
+            version: '0.10.x'
 
   - stage: Terraformvalidate
     displayName: validate
