@@ -38,7 +38,7 @@ parameters:
 stages:
   - stage: Tfsec
     displayName: Tfsec
-    condition: ${{ parameter.runTfsec }}
+    condition: ${{ parameters.runTfsec }}
     dependsOn: []
     jobs:
       - job: Tfsec
@@ -50,7 +50,7 @@ stages:
             script: 'tfsec $(Build.SourcesDirectory)/environment/dev'
   - stage: Tflint
     displayName: Tflint
-    condition: ${{ parameter.runTflint }}
+    condition: ${{ parameters.runTflint }}
     dependsOn: []
     jobs:
       - job: Tflint
@@ -62,7 +62,7 @@ stages:
             script: 'tflint --recursive --force'
   - stage: Infracost
     displayName: Infracost
-    condition: ${{ parameter.Infracost }}
+    condition: ${{ parameters.Infracost }}
     dependsOn: []
     jobs:
       - job: Infracost
@@ -76,7 +76,7 @@ stages:
 
   - stage: Terraformvalidate
     displayName: validate
-    condition: ${{ parameter.runTerraformvalidate }}
+    condition: ${{ parameters.runTerraformvalidate }}
     dependsOn:
     - tfsec
     - tflint
@@ -102,7 +102,7 @@ stages:
             workingDirectory: '$(System.DefaultWorkingDirectory)/environment/dev'
   - stage: Terraformplan
     displayName: plan
-    condition: ${{ parameter.runTerraformplan }}
+    condition: ${{ parameters.runTerraformplan }}
     dependsOn: Terraformvalidate
 
     jobs:
@@ -130,7 +130,7 @@ stages:
   - stage: manualapproval
     pool: server
     displayName: approval
-    condition: ${{ parameter.runmanualapproval }}
+    condition: ${{ parameters.runmanualapproval }}
     dependsOn: Terraformplan
     jobs:
       - job: 
@@ -143,7 +143,7 @@ stages:
        
   - stage: Terraformapply
     displayName: Apply
-    condition: ${{ parameter.runTerraformapplyl }}
+    condition: ${{ parameters.runTerraformapplyl }}
     dependsOn: manualapproval
     jobs:
       - job: TerraformApplyJob
