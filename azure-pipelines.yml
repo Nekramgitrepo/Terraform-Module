@@ -37,6 +37,7 @@ stages:
           inputs:
             apiKey: 'ico-Wr0eB6qUSBkRtImO4cmRiEFVabmRvHzQ'
             version: '0.10.x'
+            currency: 'INR'
 
   - stage: Terraformvalidate
     displayName: validate
