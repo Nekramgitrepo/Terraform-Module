@@ -28,7 +28,7 @@ parameters:
     type: boolean
 
   - name: runmanualapproval
-    displayName: manualapproval?
+    displayName: Runmanualapproval?
     type: boolean
 
   - name: runTerraformapply
