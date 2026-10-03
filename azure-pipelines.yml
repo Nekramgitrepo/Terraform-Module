@@ -7,6 +7,26 @@ trigger:
 pool: agentpool12
 
 stages:
+  - stage: tfsec
+    displayName: tfsec
+    jobs:
+      - job: tfsec
+        displayName: tfsec
+        steps:
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: 'tfsec $(Build.SourcesDirectory)/environment/dev'
+  - stage: tflint
+    displayName: tflin
+    jobs:
+      - job: tflin
+        displayName: tflin
+        steps:
+        - task: PowerShell@2
+          inputs:
+            targetType: 'inline'
+            script: 'tflint --recursive --force'
   - stage: Terraformvalidate
     displayName: validate
     jobs:
