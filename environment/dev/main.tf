@@ -1,4 +1,4 @@
-# Dev pipeline trigger test done
+# test dev pipeline
 module "resource_group" {
   source         = "../../Child_module/azurerm_resource_group"
   resource_group = var.resource_group
