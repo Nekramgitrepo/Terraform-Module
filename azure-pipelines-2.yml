@@ -1,0 +1,259 @@
+trigger:
+  branches:
+    include:
+      - feature/*
+      - main
+  paths:
+    include:
+      - environment/prod/**
+
+pool: agentpool12
+
+parameters:
+
+- name: runTfsec
+  displayName: Run Tfsec?
+  type: boolean
+  default: true
+
+- name: runTflint
+  displayName: Run TFLint?
+  type: boolean
+  default: true
+
+- name: runInfracost
+  displayName: Run Infracost?
+  type: boolean
+  default: false
+
+- name: runTerraformvalidate
+  displayName: Run Terraform Validate?
+  type: boolean
+  default: true
+
+- name: runTerraformplan
+  displayName: Run Terraform Plan?
+  type: boolean
+  default: true
+
+- name: runmanualapproval
+  displayName: Run Manual Approval?
+  type: boolean
+  default: true
+
+- name: runTerraformapply
+  displayName: Run Terraform Apply?
+  type: boolean
+  default: true
+
+
+stages:
+
+# =========================================================
+# TFSEC
+# =========================================================
+
+- stage: Tfsec
+  displayName: Tfsec
+  dependsOn: []
+  condition: and(succeeded(), ${{ parameters.runTfsec }})
+
+  jobs:
+  - job: Tfsec
+    displayName: Run Tfsec
+
+    steps:
+    - task: PowerShell@2
+      displayName: Run Tfsec
+      inputs:
+        targetType: inline
+        script: |
+          tfsec "$(Build.SourcesDirectory)/environment/prod"
+
+
+# =========================================================
+# TFLINT
+# =========================================================
+
+- stage: Tflint
+  displayName: TFLint
+  dependsOn: []
+  condition: and(succeeded(), ${{ parameters.runTflint }})
+
+  jobs:
+  - job: Tflint
+    displayName: Run TFLint
+
+    steps:
+    - task: PowerShell@2
+      displayName: Run TFLint
+      inputs:
+        targetType: inline
+        script: |
+          cd "$(Build.SourcesDirectory)/environment/prod"
+          tflint --recursive --force
+
+
+# =========================================================
+# INFRACOST
+# =========================================================
+
+- stage: Infracost
+  displayName: Infracost
+  dependsOn: []
+  condition: and(succeeded(), ${{ parameters.runInfracost }})
+
+  jobs:
+  - job: Infracost
+    displayName: Run Infracost
+
+    steps:
+    - task: InfracostSetup@2
+      displayName: Install Infracost
+      inputs:
+        apiKey: '$(INFRACOST_API_KEY)'
+        version: '0.10.x'
+        currency: 'INR'
+
+
+# =========================================================
+# TERRAFORM VALIDATE
+# =========================================================
+
+- stage: Terraformvalidate
+  displayName: Terraform Validate
+
+  dependsOn:
+    - Tfsec
+    - Tflint
+    - Infracost
+
+  condition: and(succeeded(), ${{ parameters.runTerraformvalidate }})
+
+  jobs:
+  - job: Validate
+    displayName: Terraform Validate
+
+    steps:
+
+    - task: TerraformTask@5
+      displayName: Terraform Init
+      inputs:
+        provider: azurerm
+        command: init
+        backendServiceArm: newadosvc
+        workingDirectory: '$(Build.SourcesDirectory)/environment/prod'
+        backendAzureRmResourceGroupName: 'RG-Backend'
+        backendAzureRmStorageAccountName: 'backendstoragevik'
+        backendAzureRmContainerName: 'backendcontainer'
+        backendAzureRmKey: 'prod.tfstate'
+
+    - task: TerraformTask@5
+      displayName: Terraform Validate
+      inputs:
+        provider: azurerm
+        command: validate
+        workingDirectory: '$(Build.SourcesDirectory)/environment/prod'
+
+
+# =========================================================
+# TERRAFORM PLAN
+# =========================================================
+
+- stage: Terraformplan
+  displayName: Terraform Plan
+
+  dependsOn: Terraformvalidate
+
+  condition: and(succeeded(), ${{ parameters.runTerraformplan }})
+
+  jobs:
+  - job: Plan
+    displayName: Terraform Plan
+
+    steps:
+
+    - task: TerraformTask@5
+      displayName: Terraform Init
+      inputs:
+        provider: azurerm
+        command: init
+        backendServiceArm: newadosvc
+        workingDirectory: '$(Build.SourcesDirectory)/environment/prod'
+        backendAzureRmResourceGroupName: 'RG-Backend'
+        backendAzureRmStorageAccountName: 'backendstoragevik'
+        backendAzureRmContainerName: 'backendcontainer'
+        backendAzureRmKey: 'prod.tfstate'
+
+    - task: TerraformTask@5
+      displayName: Terraform Plan
+      inputs:
+        provider: azurerm
+        command: plan
+        environmentServiceNameAzureRM: newadosvc
+        workingDirectory: '$(Build.SourcesDirectory)/environment/prod'
+
+
+# =========================================================
+# MANUAL APPROVAL
+# =========================================================
+
+- stage: ManualApproval
+  displayName: Manual Approval
+
+  dependsOn: Terraformplan
+
+  condition: and(succeeded(), ${{ parameters.runmanualapproval }})
+
+  jobs:
+  - job: Approval
+    displayName: Waiting for Approval
+    pool: server
+
+    steps:
+    - task: ManualValidation@1
+      displayName: Manual Validation
+      timeoutInMinutes: 1440
+      inputs:
+        notifyUsers: 'abc@gmail.com'
+        instructions: 'Please review Terraform Plan and approve to continue Terraform Apply.'
+        onTimeout: reject
+
+
+# =========================================================
+# TERRAFORM APPLY
+# =========================================================
+
+- stage: Terraformapply
+  displayName: Terraform Apply
+
+  dependsOn: ManualApproval
+
+  condition: and(succeeded(), ${{ parameters.runTerraformapply }})
+
+  jobs:
+  - job: TerraformApplyJob
+    displayName: Terraform Apply
+
+    steps:
+
+    - task: TerraformTask@5
+      displayName: Terraform Init
+      inputs:
+        provider: azurerm
+        command: init
+        backendServiceArm: newadosvc
+        workingDirectory: '$(Build.SourcesDirectory)/environment/prod'
+        backendAzureRmResourceGroupName: 'RG-Backend'
+        backendAzureRmStorageAccountName: 'backendstoragevik'
+        backendAzureRmContainerName: 'backendcontainer'
+        backendAzureRmKey: 'prod.tfstate'
+
+    - task: TerraformTask@5
+      displayName: Terraform Apply
+      inputs:
+        provider: azurerm
+        command: apply
+        environmentServiceNameAzureRM: newadosvc
+        workingDirectory: '$(Build.SourcesDirectory)/environment/prod'
+        commandOptions: '-auto-approve'
