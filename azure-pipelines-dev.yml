@@ -24,7 +24,7 @@ parameters:
 - name: runInfracost
   displayName: Run Infracost?
   type: boolean
-  default: false
+  default: true
 
 - name: runTerraformvalidate
   displayName: Run Terraform Validate?
