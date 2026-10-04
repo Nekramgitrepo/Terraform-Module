@@ -3,8 +3,12 @@ resource_group = {
     name     = "devrg1"
     location = "centralindia"
   }
-   rg2 = {
+  rg2 = {
     name     = "devrg2"
+    location = "centralindia"
+  }
+    rg3 = {
+    name     = "devrg3"
     location = "centralindia"
   }
 }
