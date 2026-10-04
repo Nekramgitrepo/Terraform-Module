@@ -3,6 +3,10 @@ resource_group = {
     name     = "devrg1"
     location = "centralindia"
   }
+   rg2 = {
+    name     = "devrg2"
+    location = "centralindia"
+  }
 }
 
 virtual_network = {
